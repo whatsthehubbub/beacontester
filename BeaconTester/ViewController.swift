@@ -9,6 +9,21 @@
 import UIKit
 import CoreLocation
 
+extension CLProximity {
+    var sortIndex : Int {
+        switch self {
+        case .Immediate:
+            return 0
+        case .Near:
+            return 1
+        case .Far:
+            return 2
+        case .Unknown:
+            return 3
+        }
+    }
+}
+
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLocationManagerDelegate {
     
     // MARK : Properties
@@ -80,24 +95,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func locationManager(manager: CLLocationManager!, didRangeBeacons beacons: [AnyObject]!, inRegion region: CLBeaconRegion!) {
         
         self.beacons = beacons as! [CLBeacon]
-
-        // Sort beacon array
-        func sorterForBeacons(this:CLBeacon, that:CLBeacon) -> Bool {
-            if this.proximity == that.proximity {
-                return this.minor.integerValue > that.minor.integerValue
-            }
-            
-            if this.proximity == .Immediate {
-                return true
-            } else if this.proximity == CLProximity.Near && (that.proximity == CLProximity.Far || that.proximity == CLProximity.Unknown) {
-                return true
-            } else if this.proximity == .Far && that.proximity == .Unknown {
-                return true
-            }
-            
-            return true
-        }
-
+        
+        self.beacons.sort({ $0.proximity.sortIndex < $1.proximity.sortIndex })
         
         self.tableView.reloadData()
     }
